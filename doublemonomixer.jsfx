@@ -1,0 +1,29 @@
+// DoubleMonoMoixer
+desc: Mix two mono waveforms to stereo, and unmix via The Hilbert Transform
+
+import cookdsp.jsfx-inc
+
+slider1:0<0,1,1{Encode,Decode}>Mode
+
+@init
+// Initializes the Hilbert transform
+hilbL.hilbert();
+hilbR.hilbert();
+// scale output so that it encoding and decoding gives
+// the same amplitude signal
+scaleFact = 1/sqrt(2);
+
+@sample
+left = spl0;
+right = spl1;
+
+// Hilbert transform
+hilbL.hilbert_do(left);
+hilbR.hilbert_do(right);
+
+// Choose whether to encode or decode
+slider1 == 0 ? mult = 1 : mult = -1;
+
+// Mix the sideband with input signal
+spl0 = scaleFact * (hilbL.real + mult * hilbR.imag);
+spl1 = scaleFact * (hilbR.real + mult * hilbL.imag);
